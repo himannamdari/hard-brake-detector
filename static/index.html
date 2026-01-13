@@ -1,75 +1,415 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Hard Brake Detector</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 780px; margin: 40px auto; padding: 0 16px; }
-    h1 { margin-bottom: 6px; }
-    .muted { color: #666; margin-top: 0; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
-    label { display: block; font-size: 13px; color: #333; margin-bottom: 6px; }
-    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; }
-    button { padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; }
-    button:hover { opacity: 0.95; }
-    .row { display: flex; gap: 10px; align-items: center; }
-    pre { background: #f6f6f6; padding: 12px; border-radius: 12px; overflow-x: auto; }
-    .card { border: 1px solid #eee; border-radius: 14px; padding: 16px; }
-    .links a { margin-right: 12px; }
+    :root{
+      --bg1:#0b1220;
+      --bg2:#0f1b33;
+      --card:#0f172a;
+      --card2:#111c36;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --border:rgba(255,255,255,.10);
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --good:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
+      --btn1:#7c3aed;
+      --btn2:#06b6d4;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(124,58,237,.35), transparent 60%),
+        radial-gradient(900px 500px at 85% 20%, rgba(6,182,212,.30), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+    }
+
+    .wrap{
+      max-width:1100px;
+      margin:40px auto;
+      padding:0 18px 40px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      background: linear-gradient(135deg, rgba(124,58,237,1), rgba(6,182,212,1));
+      box-shadow: 0 10px 30px rgba(124,58,237,.20);
+      display:grid;
+      place-items:center;
+      font-weight:800;
+    }
+
+    h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      margin:3px 0 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .links a{
+      color:var(--muted);
+      text-decoration:none;
+      margin-left:12px;
+      font-size:13px;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background: rgba(255,255,255,.03);
+    }
+    .links a:hover{ color:var(--text); border-color: rgba(255,255,255,.18); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card .hd{
+      padding:16px 16px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .card .hd strong{ font-size:14px; letter-spacing:.2px; }
+    .card .hd span{ display:block; font-size:12px; color:var(--muted); margin-top:2px; }
+    .card .bd{ padding:16px; }
+
+    .inputs{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+
+    input{
+      width:100%;
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(15,23,42,.65);
+      color:var(--text);
+      outline:none;
+    }
+    input:focus{ border-color: rgba(6,182,212,.45); box-shadow: 0 0 0 4px rgba(6,182,212,.12); }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      margin-top:14px;
+    }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      padding:11px 14px;
+      border-radius:14px;
+      color:white;
+      font-weight:700;
+      background: linear-gradient(135deg, var(--btn1), var(--btn2));
+      box-shadow: 0 14px 30px rgba(6,182,212,.10);
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn2{
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      color:var(--text);
+      font-weight:600;
+      box-shadow:none;
+    }
+    .btn2:hover{ border-color: rgba(255,255,255,.22); }
+
+    .status{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .resultTitle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:0 0 10px;
+    }
+
+    .pill{
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+    }
+
+    .big{
+      font-size:30px;
+      font-weight:900;
+      margin:6px 0 6px;
+      letter-spacing:.2px;
+    }
+    .muted{ color:var(--muted); font-size:13px; margin:0; }
+
+    .barWrap{
+      margin-top:12px;
+      padding:10px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+    }
+    .bar{
+      height:10px;
+      border-radius:999px;
+      background: rgba(148,163,184,.25);
+      overflow:hidden;
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      transition: width .35s ease;
+      background: linear-gradient(90deg, rgba(34,197,94,1), rgba(245,158,11,1), rgba(239,68,68,1));
+    }
+    .barMeta{
+      display:flex;
+      justify-content:space-between;
+      margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    pre{
+      margin-top:14px;
+      background: rgba(2,6,23,.55);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      overflow:auto;
+      color: #cbd5e1;
+      font-size:12px;
+    }
+
+    .footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width: 940px){
+      .grid{ grid-template-columns: 1fr; }
+    }
   </style>
 </head>
+
 <body>
-  <h1>Hard Brake Detector</h1>
-  <p class="muted">Minimal UI → calls <code>/predict</code> and shows <code>confidence</code>.</p>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">HB</div>
+        <div>
+          <h1>Hard Brake Detector</h1>
+          <p class="subtitle">FastAPI + ML inference • demo UI with confidence scoring</p>
+        </div>
+      </div>
+      <div class="links">
+        <a href="/docs" target="_blank">Swagger /docs</a>
+        <a href="/health" target="_blank">/health</a>
+      </div>
+    </div>
 
-  <div class="links">
-    <a href="/docs" target="_blank">Swagger /docs</a>
-    <a href="/health" target="_blank">/health</a>
-  </div>
-
-  <div class="card">
     <div class="grid">
-      <div>
-        <label>ax_min</label>
-        <input id="ax_min" value="-5.0">
+      <!-- Inputs card -->
+      <div class="card">
+        <div class="hd">
+          <div>
+            <strong>🧪 Input Features</strong>
+            <span>Edit values and run inference. (API expects <code>frac_below_-3</code>)</span>
+          </div>
+          <div class="pill">POST /predict</div>
+        </div>
+
+        <div class="bd">
+          <div class="inputs">
+            <div>
+              <label>ax_min</label>
+              <input id="ax_min" value="-5.0" />
+            </div>
+            <div>
+              <label>ax_mean</label>
+              <input id="ax_mean" value="-1.2" />
+            </div>
+            <div>
+              <label>ax_std</label>
+              <input id="ax_std" value="0.9" />
+            </div>
+            <div>
+              <label>gyro_var_sum</label>
+              <input id="gyro_var_sum" value="0.02" />
+            </div>
+            <div>
+              <label>speed_mean</label>
+              <input id="speed_mean" value="16.0" />
+            </div>
+            <div>
+              <label>frac_below_-3</label>
+              <input id="frac_below" value="0.45" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" onclick="predict()">Run Prediction</button>
+            <button class="btn btn2" onclick="loadHardBrake()">Load Hard-Brake Sample</button>
+            <button class="btn btn2" onclick="loadNormal()">Load Normal Sample</button>
+            <span class="status" id="status"></span>
+          </div>
+        </div>
       </div>
-      <div>
-        <label>ax_mean</label>
-        <input id="ax_mean" value="-1.2">
-      </div>
-      <div>
-        <label>ax_std</label>
-        <input id="ax_std" value="0.9">
-      </div>
-      <div>
-        <label>gyro_var_sum</label>
-        <input id="gyro_var_sum" value="0.02">
-      </div>
-      <div>
-        <label>speed_mean</label>
-        <input id="speed_mean" value="16.0">
-      </div>
-      <div>
-        <label>frac_below_-3</label>
-        <input id="frac_below" value="0.45">
+
+      <!-- Result card -->
+      <div class="card">
+        <div class="hd">
+          <div>
+            <strong>📌 Result</strong>
+            <span>Hard-brake label + model probability</span>
+          </div>
+          <div class="pill" id="badge">—</div>
+        </div>
+
+        <div class="bd">
+          <div class="resultTitle">
+            <div class="pill" id="verdictPill">Waiting</div>
+          </div>
+
+          <div class="big" id="verdict">—</div>
+          <p class="muted" id="hint">Run a prediction to see output.</p>
+
+          <div class="barWrap">
+            <div class="bar"><div id="barFill"></div></div>
+            <div class="barMeta">
+              <div>Confidence</div>
+              <div id="confTxt">—</div>
+            </div>
+          </div>
+
+          <pre id="out">{}</pre>
+        </div>
       </div>
     </div>
 
-    <div class="row">
-      <button onclick="predict()">Predict</button>
-      <span id="status"></span>
+    <div class="footer">
+      <div>Tip: For realistic confidence, calibrate probabilities + add harder negatives (bumps/phone handling).</div>
+      <div>Local: <code>http://127.0.0.1:8000</code></div>
     </div>
   </div>
-
-  <h3>Result</h3>
-  <pre id="out">{}</pre>
 
   <script>
-    async function predict() {
-      const status = document.getElementById("status");
-      const out = document.getElementById("out");
-      status.textContent = "Calling API...";
+    const statusEl = document.getElementById("status");
+    const outEl = document.getElementById("out");
+    const badgeEl = document.getElementById("badge");
+    const verdictEl = document.getElementById("verdict");
+    const verdictPillEl = document.getElementById("verdictPill");
+    const hintEl = document.getElementById("hint");
+    const barFill = document.getElementById("barFill");
+    const confTxt = document.getElementById("confTxt");
 
+    function setInputs(v){
+      document.getElementById("ax_min").value = v.ax_min;
+      document.getElementById("ax_mean").value = v.ax_mean;
+      document.getElementById("ax_std").value = v.ax_std;
+      document.getElementById("gyro_var_sum").value = v.gyro_var_sum;
+      document.getElementById("speed_mean").value = v.speed_mean;
+      document.getElementById("frac_below").value = v.frac_below;
+    }
+
+    function loadHardBrake(){
+      setInputs({
+        ax_min: -5.2, ax_mean: -1.3, ax_std: 0.9,
+        gyro_var_sum: 0.03, speed_mean: 16.0, frac_below: 0.45
+      });
+      statusEl.textContent = "Loaded hard-brake sample.";
+    }
+
+    function loadNormal(){
+      setInputs({
+        ax_min: -1.0, ax_mean: -0.2, ax_std: 0.3,
+        gyro_var_sum: 0.02, speed_mean: 16.0, frac_below: 0.00
+      });
+      statusEl.textContent = "Loaded normal sample.";
+    }
+
+    function paintResult(pred, conf){
+      const pct = Math.max(0, Math.min(100, conf * 100));
+      barFill.style.width = pct.toFixed(1) + "%";
+      confTxt.textContent = pct.toFixed(1) + "%";
+
+      if(pred === 1){
+        badgeEl.textContent = "hard_brake=1";
+        verdictPillEl.textContent = "Hard Brake";
+        verdictPillEl.style.borderColor = "rgba(239,68,68,.35)";
+        verdictPillEl.style.background = "rgba(239,68,68,.10)";
+        verdictEl.textContent = "Hard brake detected";
+        hintEl.textContent = "Pattern matches strong sustained deceleration.";
+      }else{
+        badgeEl.textContent = "hard_brake=0";
+        verdictPillEl.textContent = "Normal";
+        verdictPillEl.style.borderColor = "rgba(34,197,94,.35)";
+        verdictPillEl.style.background = "rgba(34,197,94,.10)";
+        verdictEl.textContent = "No hard brake";
+        hintEl.textContent = "Signal does not match the hard-brake signature.";
+      }
+    }
+
+    async function predict() {
+      statusEl.textContent = "Calling API...";
       const payload = {
         ax_min: parseFloat(document.getElementById("ax_min").value),
         ax_mean: parseFloat(document.getElementById("ax_mean").value),
@@ -87,18 +427,29 @@
         });
 
         const data = await res.json();
-        out.textContent = JSON.stringify(data, null, 2);
+        outEl.textContent = JSON.stringify(data, null, 2);
 
         if (!res.ok) {
-          status.textContent = "Error (see result).";
-        } else {
-          status.textContent = "Done ✅";
+          statusEl.textContent = "Error (see response).";
+          badgeEl.textContent = "error";
+          verdictEl.textContent = "Request failed";
+          hintEl.textContent = "Check payload and server logs.";
+          barFill.style.width = "0%";
+          confTxt.textContent = "—";
+          return;
         }
+
+        statusEl.textContent = "Done ✅";
+        paintResult(data.hard_brake, data.confidence);
+
       } catch (e) {
-        status.textContent = "Network error ❌";
-        out.textContent = String(e);
+        statusEl.textContent = "Network error ❌";
+        outEl.textContent = String(e);
       }
     }
+
+    // default view
+    loadHardBrake();
   </script>
 </body>
 </html>
