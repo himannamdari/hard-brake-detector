@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Hard Brake Detector</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 780px; margin: 40px auto; padding: 0 16px; }
+    h1 { margin-bottom: 6px; }
+    .muted { color: #666; margin-top: 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
+    label { display: block; font-size: 13px; color: #333; margin-bottom: 6px; }
+    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; }
+    button { padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; }
+    button:hover { opacity: 0.95; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    pre { background: #f6f6f6; padding: 12px; border-radius: 12px; overflow-x: auto; }
+    .card { border: 1px solid #eee; border-radius: 14px; padding: 16px; }
+    .links a { margin-right: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Hard Brake Detector</h1>
+  <p class="muted">Minimal UI → calls <code>/predict</code> and shows <code>confidence</code>.</p>
+
+  <div class="links">
+    <a href="/docs" target="_blank">Swagger /docs</a>
+    <a href="/health" target="_blank">/health</a>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div>
+        <label>ax_min</label>
+        <input id="ax_min" value="-5.0">
+      </div>
+      <div>
+        <label>ax_mean</label>
+        <input id="ax_mean" value="-1.2">
+      </div>
+      <div>
+        <label>ax_std</label>
+        <input id="ax_std" value="0.9">
+      </div>
+      <div>
+        <label>gyro_var_sum</label>
+        <input id="gyro_var_sum" value="0.02">
+      </div>
+      <div>
+        <label>speed_mean</label>
+        <input id="speed_mean" value="16.0">
+      </div>
+      <div>
+        <label>frac_below_-3</label>
+        <input id="frac_below" value="0.45">
+      </div>
+    </div>
+
+    <div class="row">
+      <button onclick="predict()">Predict</button>
+      <span id="status"></span>
+    </div>
+  </div>
+
+  <h3>Result</h3>
+  <pre id="out">{}</pre>
+
+  <script>
+    async function predict() {
+      const status = document.getElementById("status");
+      const out = document.getElementById("out");
+      status.textContent = "Calling API...";
+
+      const payload = {
+        ax_min: parseFloat(document.getElementById("ax_min").value),
+        ax_mean: parseFloat(document.getElementById("ax_mean").value),
+        ax_std: parseFloat(document.getElementById("ax_std").value),
+        gyro_var_sum: parseFloat(document.getElementById("gyro_var_sum").value),
+        speed_mean: parseFloat(document.getElementById("speed_mean").value),
+        "frac_below_-3": parseFloat(document.getElementById("frac_below").value),
+      };
+
+      try {
+        const res = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        out.textContent = JSON.stringify(data, null, 2);
+
+        if (!res.ok) {
+          status.textContent = "Error (see result).";
+        } else {
+          status.textContent = "Done ✅";
+        }
+      } catch (e) {
+        status.textContent = "Network error ❌";
+        out.textContent = String(e);
+      }
+    }
+  </script>
+</body>
+</html>
+
